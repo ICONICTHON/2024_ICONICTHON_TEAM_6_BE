@@ -65,7 +65,7 @@ class Detail(Resource):
             return jsonify({"message": "Event not found"}), 404
 
 
-@event_ns.route('/delete/<event_id>')
+@event_ns.route('/simple/<event_id>')
 class Simple(Resource):
     def get(self, event_id):
         col = get_collection('events')
