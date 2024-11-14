@@ -42,7 +42,7 @@ class Profile(Resource):
     def get(self, player_id):
         col = get_collection('player')
         res = col.find_one({'_id': ObjectId(player_id)}, 
-                           { '_id': 1, 'name': 1, 'birthday': 1, 'no': 1, 'position': 1, 'physical_info': 1, 'highschool': 1, 'grade': 1})
+                           { '_id': 1, 'name': 1, 'birthday': 1, 'no': 1, 'position': 1, 'physical_info': 1, 'highschool': 1, 'grade': 1, 'tuta':1, 'sports_type': 1, 'img': 1})
         if not res:
             return jsonify({'message': 'Player not found'}), 404
         
