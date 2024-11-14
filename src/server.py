@@ -8,6 +8,8 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_restx import Api
 
+import config
+
 
 # 커스텀 JSON encoder 생성
 class UpdatedJSONProvider(DefaultJSONProvider):
@@ -55,4 +57,4 @@ from view.event import event_ns
 api.add_namespace(event_ns, '/api/v1/event')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=config.PORT, debug=config.DEBUG)
