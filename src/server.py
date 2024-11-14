@@ -55,6 +55,8 @@ from view.post import post_ns
 api.add_namespace(post_ns, '/api/v1/post')
 from view.event import event_ns
 api.add_namespace(event_ns, '/api/v1/event')
+from view.article import article_ns
+api.add_namespace(article_ns, '/api/v1/article')
 
 if __name__ == '__main__':
     app.run(port=config.PORT, debug=config.DEBUG)
