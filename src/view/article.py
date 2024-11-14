@@ -39,7 +39,8 @@ class ArticleList(Resource):
                 'title': 1,
                 'date': 1,
                 'summary': 1,
-                'url': 1
+                'url': 1,
+                'img': 1
             }).sort("date", -1).limit(3)
 
             # ObjectId를 문자열로 변환하고 article_list로 변환
