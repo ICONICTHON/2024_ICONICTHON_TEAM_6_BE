@@ -47,6 +47,10 @@ CORS(
 
 from view.user import user_ns
 api.add_namespace(user_ns, '/api/v1/user')
+from view.auth import auth_ns
+api.add_namespace(auth_ns, '/api/v1/auth')
+from view.post import post_ns
+api.add_namespace(post_ns, '/api/v1/post')
 
 if __name__ == '__main__':
     app.run()
