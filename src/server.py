@@ -57,6 +57,14 @@ from view.event import event_ns
 api.add_namespace(event_ns, '/api/v1/event')
 from view.article import article_ns
 api.add_namespace(article_ns, '/api/v1/article')
+from view.coach import coach_ns
+api.add_namespace(coach_ns, '/api/v1/coach')
+from view.static import static_ns
+api.add_namespace(static_ns, '/api/v1/static')
+from view.player import player_ns
+api.add_namespace(player_ns, '/api/v1/player')
+from view.rank import rank_ns
+api.add_namespace(rank_ns, '/api/v1/rank')
 
 if __name__ == '__main__':
     app.run(port=config.PORT, debug=config.DEBUG)
