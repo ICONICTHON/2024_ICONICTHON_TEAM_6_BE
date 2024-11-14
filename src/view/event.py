@@ -69,18 +69,31 @@ class Detail(Resource):
 class Simple(Resource):
     def get(self, event_id):
         col = get_collection('events')
+        university_col = get_collection('university')
         res = col.find_one(
             {'_id': ObjectId(event_id)},
             {'_id': 1,
              'event_time': 1,
              'sports_type': 1,
              'location': 1,
-             'img': 1,
-             'teams': 1,
+             'university':1,
              'league': 1,
              'score': 1
              }
         )
+        
+        if "university" in res and res["university"]:
+            university_ids = [ObjectId(id) for id in res["university"]]
+            universities = list(university_col.find(
+                {"_id": {"$in": university_ids}},
+                {"_id": 0, "team": 1, "img": 1}
+            ))
+
+            # `team`과 `img` 리스트 생성
+            res["teams"] = [u["team"] for u in universities]
+            res["img"] = [u["img"] for u in universities]
+            del res["university"]  
+
         if res:
             return jsonify(res)
         else:
