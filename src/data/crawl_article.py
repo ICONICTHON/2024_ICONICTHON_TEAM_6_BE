@@ -7,23 +7,34 @@ from pymongo import MongoClient, ASCENDING
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from transformers import PreTrainedTokenizerFast, BartForConditionalGeneration
+import torch
 
-tokenizer = PreTrainedTokenizerFast.from_pretrained('gogamza/kobart-summarization')
-model = BartForConditionalGeneration.from_pretrained('gogamza/kobart-summarization')
-nlp = spacy.load("ko_core_news_sm")
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+tokenizer = PreTrainedTokenizerFast.from_pretrained('digit82/kobart-summarization')
+model = BartForConditionalGeneration.from_pretrained('digit82/kobart-summarization')
 
 def summarize(text):
-    inputs = tokenizer.encode(text, return_tensors="pt", max_length=1024, truncation=True)
-    summary_ids = model.generate(inputs,
-    max_length = 200,
-    min_length = 50,
-    num_beams=8,
-    length_penalty=2.5,  
-    no_repeat_ngram_size=3,  
-    early_stopping=True)
-    summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+    max_length = 1024  # 모델의 최대 입력 길이에 맞게 설정
+    step_size = max_length - 50  # 약간 중첩되게 나누기 위해 step 설정
+    summary_all = []    
+    # 텍스트를 max_length 크기로 나누어서 처리
+    for i in range(0, len(text), step_size):
+        chunk = text[i:i + max_length]
+        raw_input_ids = tokenizer.encode(chunk)
+        input_ids = [tokenizer.bos_token_id] + raw_input_ids + [tokenizer.eos_token_id]
+        
+        # 모델이 처리할 수 있도록 텐서 변환
+        summary_ids = model.generate(
+            torch.LongTensor([input_ids]), num_beams=8, max_length=512, eos_token_id=1, length_penalty=1.5, no_repeat_ngram_size=3
+        )
+        # 요약 결과를 디코딩 후 리스트에 추가
+        summary = tokenizer.decode(summary_ids.squeeze().tolist(), skip_special_tokens=True)
+        summary_all.append(summary)
+
+    # 요약 조각들을 하나로 합치기
+    final_summary = ' '.join(summary_all)
     
-    return summary
+    return final_summary
 
 def process_kill(name):
     """중복 실행중인 프로세스 종료"""
@@ -79,6 +90,14 @@ def capture_network_traffic(url):
             xhr_responses.append(entry['response']['content']['text'])
     return xhr_responses
 
+def extract_author(text):
+    # 정규 표현식을 사용해 '[다르마 = {기자 이름} 기자]' 형식에서 기자 이름만 추출
+    match = re.search(r'\[.*?다르마.*?=\s*(.*?)\s*기자.*?\]', text)
+    if match:
+        return match.group(1).strip()
+    
+    return "NULL"
+
 def crawl_news_list(xhr_responses, sports_type):
     """응답 데이터 가공"""
     news_list = []
@@ -116,9 +135,15 @@ def crawl_news(url):
             description.append(element.get_text(separator=' ', strip=True).replace('\xa0', ' '))
         
         text = ' '.join(description)
-        summary = summarize(text)
+        # 기자 이름 추출
+        author = extract_author(text)
 
-        news_data = {'title': title, 'date': date, 'description': text, 'summary': summary, 'url': url}            
+        if len(text) < 400:
+            summary = text
+        else:
+            summary = summarize(text)
+
+        news_data = {'title': title, 'date': date, 'description': text, 'summary': summary, 'url': url, 'author': author}            
             
     except Exception as e:
         print(f"본문을 추출할 수 없습니다: {e}")
@@ -155,7 +180,7 @@ def insert_and_check_data():
     sports_url = {
         'https://m.post.naver.com/my/series/detail.naver?memberNo=51653576&seriesNo=623989': 'soccer',
         'https://m.post.naver.com/my/series/detail.naver?memberNo=51653576&seriesNo=623990': 'baeball',
-        'https://m.post.naver.com/my/series/detail.naver?memberNo=51653576&seriesNo=623991': 'soccer'
+        'https://m.post.naver.com/my/series/detail.naver?memberNo=51653576&seriesNo=623991': 'basketball'
     }
     article_result = []
     for url in sports_url:
@@ -180,7 +205,9 @@ def insert_and_check_data():
         # 각 ID에 대해 MongoDB에서 문서를 가져와 확인
         document = collection.find_one({"_id": ObjectId(doc_id)})
         pprint.pprint(document)  # 데이터를 보기 좋게 출력
+        
+    
+    
 
 if __name__ == '__main__':
-    
     insert_and_check_data()
