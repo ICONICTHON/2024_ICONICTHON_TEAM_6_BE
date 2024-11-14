@@ -1,11 +1,13 @@
-from flask import jsonify, request
-from flask_restx import Namespace, Resource
-from util.db import get_collection
-from bson.objectid import ObjectId
 from datetime import datetime
 
+from bson import ObjectId
+from flask import jsonify, request
+from flask_restx import Namespace, Resource
+
+from util.db import get_collection
 
 event_ns = Namespace('event')
+
 
 @event_ns.route('/list')
 class EventList(Resource):
@@ -53,18 +55,38 @@ class EventList(Resource):
 class Detail(Resource):
     def get(self, event_id):
         col = get_collection('events')
-        # 특정 필드만 반환 (team_record)
         res = col.find_one(
-            {'_id': ObjectId(event_id)}, 
-            {'_id': 1, 'team_record': 1} 
+            {'_id': ObjectId(event_id)},
+            {'_id': 1, 'team_record': 1}
         )
         if res:
             return jsonify(res)
         else:
             return jsonify({"message": "Event not found"}), 404
-  
 
 
+@event_ns.route('/delete/<event_id>')
+class Simple(Resource):
+    def get(self, event_id):
+        col = get_collection('events')
+        res = col.find_one(
+            {'_id': ObjectId(event_id)},
+            {'_id': 1,
+             'event_time': 1,
+             'sports_type': 1,
+             'location': 1,
+             'img': 1,
+             'teams': 1,
+             'league': 1,
+             'score': 1
+             }
+        )
+        if res:
+            return jsonify(res)
+        else:
+            return jsonify({"message": "Event not found"}), 404
+
+          
 @event_ns.route('/month/<int:year>/<int:month>')
 class Month(Resource):
     def get(self, year, month):
@@ -91,6 +113,7 @@ class Month(Resource):
         if sports_type:
             query['sports_type'] = sports_type
         
+
         field = {
             '_id': 1,
             'event_time': 1,
@@ -188,7 +211,3 @@ class Day(Resource):
             event_list.append(event)
 
         return jsonify(event_list)
-    
-        
-        
-
