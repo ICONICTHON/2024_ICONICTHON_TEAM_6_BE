@@ -51,6 +51,8 @@ from view.auth import auth_ns
 api.add_namespace(auth_ns, '/api/v1/auth')
 from view.post import post_ns
 api.add_namespace(post_ns, '/api/v1/post')
+from view.event import event_ns
+api.add_namespace(event_ns, '/api/v1/event')
 
 if __name__ == '__main__':
     app.run()
