@@ -1,8 +1,8 @@
+from bson import ObjectId
 from flask import jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Namespace, Resource
 
-from model.scheme import ObjectId
 from util.db import get_collection, server_info
 
 user_ns = Namespace('user')

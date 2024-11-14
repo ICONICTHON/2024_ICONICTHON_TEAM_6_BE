@@ -1,9 +1,9 @@
 from datetime import datetime
 
+from bson import ObjectId
 from flask import jsonify, request
 from flask_restx import Namespace, Resource
 
-from model.scheme import ObjectId
 from util.db import get_collection
 
 event_ns = Namespace('event')
@@ -33,9 +33,11 @@ class EventList(Resource):
         events = list(res)
 
         if events:
-            return jsonify(events)
+            for event in events:
+                event['_id'] = str(event['_id'])
+            return events
         else:
-            return jsonify({'message': 'No events found'}), 404
+            return {'message': 'No events found'}, 404
 
 
 @event_ns.route('/detail/<event_id>')
@@ -90,10 +92,9 @@ class Month(Resource):
             }
         }
         sports_type = request.args.get('sports_type', None)
-        query = {}
         if sports_type:
             query['sports_type'] = sports_type
-        res = col.find(query, {
+        field = {
             '_id': 1,
             'event_time': 1,
             'm_code': 1,
@@ -103,12 +104,13 @@ class Month(Resource):
             'teams': 1,
             'league': 1,
             'score': 1
-        })
-        events = list(res)
-        if events:
-            return jsonify(events)
-        else:
-            return jsonify({'message': 'No events found'}), 404
+        }
+        events = col.find(query, field)
+        event_list = []
+        for event in events:
+            event['_id'] = str(event['_id'])
+            event_list.append(event)
+        return jsonify(event_list)
 
 
 @event_ns.route('/detail/<event_id>')

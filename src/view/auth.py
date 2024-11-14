@@ -22,7 +22,7 @@ class Login(Resource):
     def post(self):
         data = request.get_json()
         res = requests.get(
-            f"{os.environ.get('KAPI_HOST')}//v1/oidc/userinfo",
+            f"{os.environ.get('KAPI_HOST')}/v1/oidc/userinfo",
             headers={'Authorization': 'Bearer ' + data['accessToken']})
         if res.status_code == 200:
             res_data = res.json()
