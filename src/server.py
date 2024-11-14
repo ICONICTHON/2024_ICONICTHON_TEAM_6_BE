@@ -67,4 +67,4 @@ from view.rank import rank_ns
 api.add_namespace(rank_ns, '/api/v1/rank')
 
 if __name__ == '__main__':
-    app.run(port=config.PORT, debug=config.DEBUG)
+    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
