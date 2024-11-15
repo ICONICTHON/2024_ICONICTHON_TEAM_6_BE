@@ -11,10 +11,13 @@ UPLOAD_FOLDER = os.path.join(CURRENT_DIR, '../../static/player_img')
 class PlayerImg(Resource):
     def get(self, img_name):
         try:
-            return send_from_directory(UPLOAD_FOLDER, img_name)
+            response = send_from_directory(UPLOAD_FOLDER, img_name)
+            return make_response(response)
 
         except FileNotFoundError:
-            return jsonify({"error": "File not found"}), 404
+            # Return a JSON error for missing files
+            return {"error": "File not found"}, 404
 
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            # Return a JSON error for unexpected issues
+            return {"error": str(e)}, 500

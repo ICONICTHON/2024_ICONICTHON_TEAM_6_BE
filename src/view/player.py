@@ -42,7 +42,7 @@ class Profile(Resource):
     def get(self, player_id):
         col = get_collection('player')
         res = col.find_one({'_id': ObjectId(player_id)}, 
-                           { '_id': 1, 'name': 1, 'birthday': 1, 'no': 1, 'position': 1, 'physical_info': 1, 'highschool': 1, 'grade': 1})
+                           { '_id': 1, 'name': 1, 'birthday': 1, 'no': 1, 'position': 1, 'physical_info': 1, 'highschool': 1, 'grade': 1, 'tuta':1, 'sports_type': 1, 'img': 1})
         if not res:
             return jsonify({'message': 'Player not found'}), 404
         
@@ -95,7 +95,7 @@ class Record(Resource):
     def get(self, player_id):
         col = get_collection('player')
         res = col.find_one({'_id': ObjectId(player_id)}, 
-                           {'_id': 1, 'league_record': 1})
+                           {'_id': 1, 'league_record': 1, 'league__hitter_record': 1, 'league_pitcher_record': 1,})
         # 검색된 선수가 없는 경우 처리
         if not res:
             return jsonify({'message': 'Player not found'}), 404

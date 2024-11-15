@@ -1,9 +1,9 @@
 import json
 from bson.objectid import ObjectId
 from marshmallow import Schema, fields, post_load
-from src.model import scheme
+from model import scheme
 
-from src.util.db import get_collection
+from util.db import get_collection
 
 
 class UserSchema(Schema):
